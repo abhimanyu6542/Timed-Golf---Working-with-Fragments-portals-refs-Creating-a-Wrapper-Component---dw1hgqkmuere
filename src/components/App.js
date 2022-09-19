@@ -1,74 +1,13 @@
 import React, { Component, useState } from "react";
-
-import Ball from "./Ball";
-import Hole from "./Hole";
-import Start from "./Start";
-import Timer from "./Timer";
-
 import "../styles/App.css";
 class App extends React.Component {
   constructor(props) {
     super(props);
-
-    this.state = { 
-      time: 0, 
-      x: 0, 
-      y: 0, 
-      interval: 0, 
-      hideStartButton: false 
-    };
-    
-    this.left = this.left.bind(this);
-    this.right = this.right.bind(this);
-    this.up = this.up.bind(this);
-    this.down = this.down.bind(this);
-
-    this.startGame = this.startGame.bind(this);
-    this.stopGame = this.stopGame.bind(this);
+    this.state ={time: 0, x: 0, y: 0 ,top:0,left:0,srartTime:0};
+    this.buttonClickHandler=this.buttonClickHandler.bind(this);
+    this.handeleventlistner=this.handeleventlistner.bind(this);
+    this.tick=this.tick.bind(this);
   }
-
-  left() {
-    this.setState({
-      x: this.state.x - 5
-    })
-  }
-
-  right() {
-    this.setState({
-      x: this.state.x + 5
-    })
-  }
-
-  up() {
-    this.setState({
-      y: this.state.y - 5
-    })
-  }
-
-  down() {
-    this.setState({
-      y: this.state.y + 5
-    })
-  }
-
-  startGame() {
-    this.setState({
-      hideStartButton: true
-    })
-
-    this.state.interval = setInterval(()=> {
-      this.setState({
-        time: this.state.time + 1
-      })
-
-    }, 1000);
-
-  }
-
-  stopGame() {
-    clearInterval(this.state.interval);
-  }
-
   componentDidMount() {
     
   }
@@ -76,24 +15,71 @@ class App extends React.Component {
   componentWillUnmount() {
     
   }
+  buttonClickHandler(){
+    document.addEventListener("keydown",this.handeleventlistner);
+    clearInterval(this.timerID);
+    this.setState({time: 0, x: 0, y: 0 ,top:0,left:0,startTime:Date.now()})
+    this.timerID = setInterval(
+      () => this.tick(),
+      1000
+    );
+  }
+  tick() {
+    if(!(this.state.x ==250 &&this.state.y==250)){
+      let timePassed= Date.now() - this.state.startTime ;
+      let sec=Math.floor(timePassed/(1000));
+      this.setState({
+      time:sec
+      });
+    }
+  }
+  handeleventlistner(e){
+    let code=e.keyCode;
+    
+    if(code==39 && !(this.state.x ==250 &&this.state.y==250)){
+        this.setState({
+            x: this.state.left+5, y: this.state.top ,top:this.state.top,left:this.state.left+5
+        });
+    }
+    if(code==37  && !(this.state.x ==250 &&this.state.y==250)){
+        
+        this.setState({
+          
+         x: this.state.left-5, y: this.state.top ,top:this.state.top,left:this.state.left-5
+      });
+    }
+    if(code==38 && !(this.state.x ==250 &&this.state.y==250)){
+        this.setState({
+          
+          x: this.state.left, y:this.state.top-5 ,top:this.state.top-5,left:this.state.left
+      });
+    }
+    if(code==40 && !(this.state.x ==250 &&this.state.y==250)){
+        this.setState({
+          
+          x:this.state.left, y: this.state.top+5 ,top:this.state.top+5,left:this.state.left
+      });
+    }
+    if(this.state.x==250 && this.state.y==250){
+      clearInterval(this.timerID);
+      //alert("matched");
+      document.removeEventListener("keydown",this.handeleventlistner);
+    }
+    //console.log(this.state.x, this.state.y);
 
-
-
+  }
   render() {
     return (
-      <> 
-        <Ball position={{x:this.state.x, y:this.state.y}} 
-          left={this.left}
-          right={this.right}
-          up={this.up}
-          down={this.down}
-          stopGame={this.stopGame}
-          hideStartButton={this.state.hideStartButton}/>
-
-        <Hole />
-        <Start startGame={this.startGame} hideStartButton={this.state.hideStartButton}/> 
-        <Timer time={this.state.time}/>
-      </>
+    <>
+    <div className="playground">
+    <div className="ball" style={{ position:"absolute",top:this.state.top +"px",
+      left:this.state.left +"px",
+      }}></div>
+      <button className="start" onClick={this.buttonClickHandler} >Start timer</button>
+      <div className="hole" ></div>
+      <div className="heading-timer">{this.state.time}</div>
+    </div>
+    </>
     );
   }
 }
